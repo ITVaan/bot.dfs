@@ -19,7 +19,7 @@ from simplejson import dumps
 from gevent import event
 
 from bot.dfs.bridge.constants import tender_status, AWARD_STATUS
-from bot.dfs.bridge.filter_tender import FilterTenders
+from bot.dfs.bridge.workers.filter_tender import FilterTenders
 from bot.dfs.bridge.utils import item_key
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.data import Data

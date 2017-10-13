@@ -12,7 +12,7 @@ from time import sleep
 from munch import munchify
 from restkit.errors import Unauthorized, RequestFailed, ResourceError
 
-from bot.dfs.bridge.scanner import Scanner
+from bot.dfs.bridge.workers.scanner import Scanner
 from utils import custom_sleep
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.sleep_change_value import APIRateController

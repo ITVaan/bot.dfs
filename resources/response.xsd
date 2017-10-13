@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:complexType name="response">
+        <xs:sequence>
+            <xs:element name="HFILL" type="xs:dateTime" minOccurs="1"/>
+            <xs:element name="HTIN" type="xs:string" minOccurs="1"/>
+            <xs:element name="HLNAMEU" type="xs:string" minOccurs="1"/>
+            <xs:element name="HLNAME" type="xs:string" minOccurs="1"/>
+            <xs:element name="HPNAME" type="xs:string" minOccurs="1"/>
+            <xs:element name="HFNAME" type="xs:string"/>
+            <xs:element name="FLAG" type="xs:string" minOccurs="1"/>
+            <xs:element name="HFILL1" type="xs:dateTime" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="response" type="response"/>
+
+</xs:schema>

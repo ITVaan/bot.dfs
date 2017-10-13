@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bot.dfs.bridge.sfs_worker import SfsWorker
+from bot.dfs.bridge.workers.sfs_worker import SfsWorker
 from gevent import monkey
 
 monkey.patch_all()
@@ -20,12 +20,12 @@ from constants import retry_mult
 
 from openprocurement_client.client import TendersClientSync as BaseTendersClientSync, TendersClient as BaseTendersClient
 from process_tracker import ProcessTracker
-from scanner import Scanner
-from request_for_reference import RequestForReference
+from bot.dfs.bridge.workers.scanner import Scanner
+from bot.dfs.bridge.workers.request_for_reference import RequestForReference
 from requests_db import RequestsDb
 from requests_to_sfs import RequestsToSfs
 from caching import Db
-from filter_tender import FilterTenders
+from bot.dfs.bridge.workers.filter_tender import FilterTenders
 from utils import journal_context, check_412
 from journal_msg_ids import (DATABRIDGE_RESTART_WORKER, DATABRIDGE_START, DATABRIDGE_DOC_SERVICE_CONN_ERROR)
 

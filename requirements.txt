@@ -38,6 +38,7 @@ sphinxcontrib-httpdomain==1.4.0
 translationstring==1.3
 tzlocal==1.1.2
 xmlsec==1.3.3
+xmlschema==0.9.12
 venusian==1.0
 waitress==0.8.9
 zeep

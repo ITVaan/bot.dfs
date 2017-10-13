@@ -8,7 +8,7 @@ from gevent.queue import Queue
 from base import BaseServersTest
 from mock import patch
 
-from bot.dfs.bridge.request_for_reference import RequestForReference
+from bot.dfs.bridge.workers.request_for_reference import RequestForReference
 from bot.dfs.bridge.sleep_change_value import APIRateController
 from bot.dfs.bridge.requests_db import RequestsDb
 from bot.dfs.bridge.requests_to_sfs import RequestsToSfs

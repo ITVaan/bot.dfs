@@ -1,18 +1,7 @@
 # -*- coding: utf-8 -*-
-from json import loads
 
 import os
-
 from pytz import timezone
-
-
-def read_json(name):
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(curr_dir, name)
-    with open(file_path) as lang_file:
-        data = lang_file.read()
-    return loads(data)
-
 
 major = 0
 minor = 0
@@ -28,5 +17,7 @@ AWARD_STATUS = 'active'
 FORM_NAME = "Jxxxxxxx"
 qualification_procurementMethodType = ('aboveThresholdUA', 'aboveThresholdUA.defense', 'aboveThresholdEU',
                                        'competitiveDialogueUA.stage2', 'competitiveDialogueEU.stage2')
-HOLIDAYS = read_json('working_days.json')
+HOLIDAYS_FILE = 'working_days.json'
 TZ = timezone(os.environ['TZ'] if 'TZ' in os.environ else 'Europe/Kiev')
+file_name = "sfs_reference.yaml"
+

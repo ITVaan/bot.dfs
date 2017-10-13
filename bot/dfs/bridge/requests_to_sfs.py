@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from bot.dfs.bridge.xml_utils import form_xml_to_post
 from zeep import Client
 
 
@@ -22,3 +23,10 @@ class RequestsToSfs(object):
         sfs_get_certificate = self.sfs_client.service.GetCertificate(caName=ca_name)
         cert = sfs_get_certificate.certs.Certificate[0].cert
         return cert
+
+    def post(self, data, ca_name, cert, request_id):
+        """Post request to sfs"""
+        document = form_xml_to_post(data, request_id)
+        return "This is a test return because lol what is specification"
+        # return self.sfs_client.service.Post(document=document, recipientDept=1, procAllDepts=1,
+        #                                               caName=ca_name, cert=cert)

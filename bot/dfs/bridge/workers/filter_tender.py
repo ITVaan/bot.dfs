@@ -10,11 +10,11 @@ from gevent import spawn
 from gevent.hub import LoopExit
 from simplejson import loads
 
-from utils import generate_req_id, journal_context, is_code_invalid
-from data import Data
-from base_worker import BaseWorker
-from journal_msg_ids import DATABRIDGE_TENDER_NOT_PROCESS
-from constants import scheme
+from bot.dfs.bridge.utils import generate_req_id, journal_context, is_code_invalid
+from bot.dfs.bridge.data import Data
+from bot.dfs.bridge.workers.base_worker import BaseWorker
+from bot.dfs.bridge.journal_msg_ids import DATABRIDGE_TENDER_NOT_PROCESS
+from bot.dfs.bridge.constants import scheme
 
 logger = logging.getLogger(__name__)
 
