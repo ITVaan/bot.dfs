@@ -10,17 +10,17 @@ from gevent import spawn
 from gevent.hub import LoopExit
 from simplejson import loads
 
-from utils import generate_req_id, journal_context, is_code_invalid
-from data import Data
-from base_worker import BaseWorker
-from journal_msg_ids import DATABRIDGE_TENDER_NOT_PROCESS
-from constants import scheme
+from bot.dfs.bridge.utils import generate_req_id, journal_context, is_code_invalid
+from bot.dfs.bridge.data import Data
+from bot.dfs.bridge.workers.base_worker import BaseWorker
+from bot.dfs.bridge.journal_msg_ids import DATABRIDGE_TENDER_NOT_PROCESS
+from bot.dfs.bridge.constants import scheme
 
 logger = logging.getLogger(__name__)
 
 
 class FilterTenders(BaseWorker):
-    """ Edr API Data Bridge """
+    """ Edr API XmlData Bridge """
 
     def __init__(self, tenders_sync_client, filtered_tender_ids_queue, edrpou_codes_queue, process_tracker,
                  services_not_available, sleep_change_value, delay=15):
@@ -75,8 +75,9 @@ class FilterTenders(BaseWorker):
         tender = loads(response.body_string())['data']
         for aw in active_award(tender):
             for code in get_codes(aw):
-                data = Data(tender['id'], aw['id'], code[0], code[1])
-                self.process_tracker.set_item(data.tender_id, data.item_id)
+                data = Data(tender['id'], aw['id'], code[0], code[1],
+                            file_content={"meta": {'sourceRequests': [response.headers['X-Request-ID']]}})
+                self.process_tracker.set_item(data.tender_id, data.award_id)
                 self.edrpou_codes_queue.put(data)
             else:
                 logger.info('Tender {} bid {} award {} identifier schema isn\'t UA-EDR,.'.format(
@@ -102,7 +103,7 @@ def active_award(tender):
 
 
 def get_codes(award):
-    return [(supplier['identifier']['id'], supplier['identifier']['name'])
+    return [(supplier['identifier']['id'], supplier['identifier']['legalName'])
             for supplier in award['suppliers'] if is_valid(supplier)]
 
 

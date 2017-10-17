@@ -107,7 +107,7 @@ class EndToEndTest(BaseServersTest):
         #     setup_routing(self.api_server_bottle, get_tender_response, path='/api/2.3/tenders/123')
         #     self.worker.scanner()
         #     self.worker.filter_tender()
-        #     data = Data('123', award_ids[2], CODES[2], "company_name")
+        #     data = XmlData('123', award_ids[2], CODES[2], "company_name")
         #     sleep(5)
         #     # sleep_until_done(self.worker, is_working_filter)
         #     self.assertEqual(self.worker.edrpou_codes_queue.get(), data)
