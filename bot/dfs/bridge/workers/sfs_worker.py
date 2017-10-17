@@ -37,13 +37,14 @@ class SfsWorker(BaseWorker):
     def process_new_request(self, data):
         """Make a new request, bind award in question to it"""
         request_id = generate_request_id()
-        response = self.sfs_client.post(data, "", "", request_id)  # TODO: Very much WIP
-        self.requests_db.add_sfs_request(request_id, {"edr_code": data.edr_code, "tender_id": data.tender_id,
-                                                      "name": data.company_name})
+        data.file_content['meta']['sourceRequests'].append(request_id)
+        response = self.sfs_client.post(data, "", "", request_id)
+        self.requests_db.add_sfs_request(request_id, {"code": data.code, "tender_id": data.tender_id,
+                                                      "name": data.name})
 
     def process_existing_request(self, data, existing_request_id):
         """bind award to existing request, load the answer which is already there into Central Database"""
-        completed_reqs = self.requests_db.recent_complete_requests_with(data.edr_code)
+        completed_reqs = self.requests_db.recent_complete_requests_with(data.code)
         if completed_reqs:  # this way we upload the completed request, not pending one
             self.requests_db.add_award(data.tender_id, data.award_id, completed_reqs[0])
             self.upload_to_api_queue.put((data, self.requests_db.get_request(completed_reqs[0])))

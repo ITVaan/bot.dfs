@@ -13,7 +13,7 @@ class RequestsDb(object):
     def add_sfs_request(self, request_id, request_data):
         self._db.hmset(req_key(request_id), request_data)
         self._db.sadd("requests:pending", request_id)
-        self._db.sadd("requests:edrpou:{}".format(request_data['edr_code']), request_id)
+        self._db.sadd("requests:edrpou:{}".format(request_data['code']), request_id)
         self._db.zadd("requests:dates", time(), request_id)
 
     def get_pending_requests(self):
@@ -31,18 +31,18 @@ class RequestsDb(object):
         self._db.put(award_key(tender_id, award_id), request_id)
         self._db.sadd("tenders_of:{}".format(request_id), award_key(tender_id, award_id))
 
-    def recent_requests_with(self, edr_code):
-        self._db.zinterstore("recent:requests:edrpou:{}".format(edr_code), ("requests:edrpou:{}".format(edr_code),
+    def recent_requests_with(self, code):
+        self._db.zinterstore("recent:requests:edrpou:{}".format(code), ("requests:edrpou:{}".format(code),
                                                                             "requests:dates"))
-        return self._db.zrangebyscore("recent:requests:edrpou:{}".format(edr_code), time() - self.time_range, time())
+        return self._db.zrangebyscore("recent:requests:edrpou:{}".format(code), time() - self.time_range, time())
 
-    def complete_requests_with(self, edr_code):
-        return self._db.sinter("complete:requests:with", ("requests:edrpou:{}".format(edr_code), "requests:complete"))
+    def complete_requests_with(self, code):
+        return self._db.sinter("complete:requests:with", ("requests:edrpou:{}".format(code), "requests:complete"))
 
-    def recent_complete_requests_with(self, edr_code):
-        self._db.zinterstore("recent:complete:edrpou:{}:".format(edr_code), ("requests:edrpou:{}".format(edr_code),
+    def recent_complete_requests_with(self, code):
+        self._db.zinterstore("recent:complete:edrpou:{}:".format(code), ("requests:edrpou:{}".format(code),
                                                                              "requests:dates"))
-        return self._db.zrangebyscore("recent:complete:edrpou:{}:".format(edr_code), time() - self.time_range, time())
+        return self._db.zrangebyscore("recent:complete:edrpou:{}:".format(code), time() - self.time_range, time())
 
     def add_daily_request(self):
         self._db.incr("requests:number")

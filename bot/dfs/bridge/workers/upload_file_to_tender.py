@@ -87,7 +87,7 @@ class UploadFileToTender(BaseWorker):
         self.client.headers.update({'X-Client-Request-ID': tender_data.doc_id()})
         self.client._create_tender_resource_item(munchify({'data': {'id': tender_data.tender_id}}),
                                                  {'data': document_data},
-                                                 'awards/{}/documents'.format(tender_data.item_id))
+                                                 'awards/{}/documents'.format(tender_data.award_id))
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=retry_mult)
     def do_upload_to_tender_with_retry(self, tender_data):
@@ -132,7 +132,7 @@ class UploadFileToTender(BaseWorker):
         self.remove_data(tender_data, is_retry)
 
     def remove_data(self, tender_data, is_retry):
-        self.process_tracker.update_items_and_tender(tender_data.tender_id, tender_data.item_id, tender_data.doc_id())
+        self.process_tracker.update_items_and_tender(tender_data.tender_id, tender_data.award_id, tender_data.doc_id())
         self.sleep_change_value.decrement()
         if is_retry:
             self.retry_upload_to_tender_queue.get()

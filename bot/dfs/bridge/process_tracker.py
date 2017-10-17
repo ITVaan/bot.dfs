@@ -15,8 +15,8 @@ class ProcessTracker(object):
         self.tender_documents_to_process = {}
         self.ttl = ttl
 
-    def set_item(self, tender_id, item_id, docs_amount=0):
-        self.processing_items[item_key(tender_id, item_id)] = docs_amount
+    def set_item(self, tender_id, award_id, docs_amount=0):
+        self.processing_items[item_key(tender_id, award_id)] = docs_amount
         self._add_docs_amount_to_tender(tender_id, docs_amount)
 
     def _add_docs_amount_to_tender(self, tender_id, docs_amount):
@@ -32,13 +32,13 @@ class ProcessTracker(object):
             self._db.put(db_key(tender_id), datetime.now().isoformat(), self.ttl)
             del self.tender_documents_to_process[tender_id]
 
-    def check_processing_item(self, tender_id, item_id):
-        """Check if current tender_id, item_id is processing"""
-        return item_key(tender_id, item_id) in self.processing_items.keys()
+    def check_processing_item(self, tender_id, award_id):
+        """Check if current tender_id, award_id is processing"""
+        return item_key(tender_id, award_id) in self.processing_items.keys()
 
-    def check_processed_item(self, tender_id, item_id):
-        """Check if current tender_id, item_id was already processed"""
-        return item_key(tender_id, item_id) in self.processed_items.keys()
+    def check_processed_item(self, tender_id, award_id):
+        """Check if current tender_id, award_id was already processed"""
+        return item_key(tender_id, award_id) in self.processed_items.keys()
 
     def check_processed_tenders(self, tender_id):
         return self._db.has(db_key(tender_id)) or False
@@ -52,8 +52,8 @@ class ProcessTracker(object):
     def _remove_unprocessed_item(self, document_id):
         self._db.remove(document_id)
 
-    def _update_processing_items(self, tender_id, item_id, document_id):
-        key = item_key(tender_id, item_id)
+    def _update_processing_items(self, tender_id, award_id, document_id):
+        key = item_key(tender_id, award_id)
         if self.processing_items[key] > 1:
             self.processing_items[key] -= 1
         else:
@@ -61,6 +61,6 @@ class ProcessTracker(object):
             self._remove_unprocessed_item(document_id)
             del self.processing_items[key]
 
-    def update_items_and_tender(self, tender_id, item_id, document_id):
-        self._update_processing_items(tender_id, item_id, document_id)
+    def update_items_and_tender(self, tender_id, award_id, document_id):
+        self._update_processing_items(tender_id, award_id, document_id)
         self._remove_docs_amount_from_tender(tender_id)

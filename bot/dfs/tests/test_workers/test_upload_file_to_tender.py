@@ -89,9 +89,9 @@ class TestUploadFileToTenderWorker(unittest.TestCase):
         self.upload_to_tender_queue = Queue(10)
         self.url = 'http://127.0.0.1:20604'
         self.sleep_change_value = APIRateController()
-        self.data = Data(self.tender_id, self.award_id, '123', 'awards',
+        self.data = Data(self.tender_id, self.award_id, '12345678', 'awards',
                          {'meta': {'id': self.document_id}, 'test_data': 'test_data'})
-        self.qualification_data = Data(self.tender_id, self.qualification_id, '123', 'qualifications',
+        self.qualification_data = Data(self.tender_id, self.qualification_id, '12345678', 'qualifications',
                                        {'meta': {'id': self.document_id}, 'test_data': 'test_data'})
         self.client = MagicMock()
         self.worker = UploadFileToTender(self.client, self.upload_to_tender_queue,
@@ -207,7 +207,7 @@ class TestUploadFileToTenderWorker(unittest.TestCase):
         self.assertEqual(self.client._create_tender_resource_item.call_count, 2)  # check that processed just 1 request
 
     def datum(self):
-        return Data(self.tender_id, self.award_id, '123', 'awards',
+        return Data(self.tender_id, self.award_id, '12345678', 'awards',
                     {u'meta': {u'id': self.document_id},
                      u'url': u'http://docs-sandbox.openprocurement.org/get/8ccbfde0c6804143b119d9168452cb6f',
                      u'format': u'application/yaml',

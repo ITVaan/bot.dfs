@@ -1,10 +1,10 @@
 # coding=utf-8
+from bot.dfs.bridge.data import Data
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.requests_db import RequestsDb
 from bot.dfs.bridge.requests_to_sfs import RequestsToSfs
 from bot.dfs.bridge.sleep_change_value import APIRateController
 from bot.dfs.bridge.workers.sfs_worker import SfsWorker
-from bot.dfs.bridge.xml_utils import Data
 from bot.dfs.tests.base import BaseServersTest
 from gevent import event
 from gevent.queue import Queue
@@ -44,21 +44,21 @@ class TestSfsWorker(BaseServersTest):
         self.assertEqual(sleep_change_value, worker.sleep_change_value)
 
     def test_process_new_request(self):
-        data = Data(1, 1, 1, False, "comname", None, None, None)
+        data = Data(1, 1, 12345678, "comname", {"meta": {"sourceRequests": []}})
         self.worker.process_new_request(data)
 
     def test_process_new_request_physical(self):
-        data = Data(1, 1, 1, True, None, "last", "first", "family")
+        data = Data(1, 1, 1234, "last_name first_name family_name", {"meta": {"sourceRequests": []}})
         self.worker.process_new_request(data)
 
     def test_process_existing_request(self):
-        data = Data(1, 1, 1, False, "comname", None, None, None)
+        data = Data(1, 1, 12345678, "comname", {"meta": {"sourceRequests": []}})
         req_id = 111
         self.worker.process_existing_request(data, req_id)
 
     def test_processing_existing_request_with_completed(self):
-        data = Data(1, 1, 1, False, "comname", None, None, None)
+        data = Data(1, 1, 12345678, "comname", {"meta": {"sourceRequests": []}})
         req_id = 111
-        self.worker.requests_db.add_sfs_request(req_id, {"edr_code": data.edr_code, "status": "pending"})
+        self.worker.requests_db.add_sfs_request(req_id, {"code": data.code, "status": "pending"})
         self.worker.requests_db.complete_request(req_id)
         self.worker.process_existing_request(data, req_id)

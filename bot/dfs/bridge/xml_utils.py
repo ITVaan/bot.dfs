@@ -9,7 +9,7 @@ import xmlschema
 
 
 def is_valid(request):
-    schema = xmlschema.XMLSchema("resources/request.xsd")
+    schema = xmlschema.XMLSchema("/home/dtrenkenshu/PycharmProjects/bot.dfs/resources/request.xsd")
     return schema.is_valid(request)
 
 
@@ -26,7 +26,7 @@ def form_xml_to_post(data, request_id):
     hnum = SubElement(request, "HNUM")
     hnum.text = str(request_id)
     htin = SubElement(request, "HTIN")
-    htin.text = str(data.edr_code)
+    htin.text = str(data.code)
     hlnameu = SubElement(request, "HLNAMEU")
     hlname = SubElement(request, "HLNAME")
     hpname = SubElement(request, "HPNAME")
@@ -34,7 +34,7 @@ def form_xml_to_post(data, request_id):
     if data.is_physical:
         hlname.text = data.last_name
         hpname.text = data.first_name
-        hfname.text = data.fathers_name
+        hfname.text = data.family_name
     else:
         hlnameu.text = data.company_name
     id = SubElement(request, "ID")
@@ -43,7 +43,3 @@ def form_xml_to_post(data, request_id):
     hfill.text = datetime.now().isoformat()
     print(prettify(request))
     print(is_valid(request))
-
-
-Data = namedtuple("Data", ['tender_id', "award_id", 'edr_code', 'is_physical', 'company_name',
-                           'last_name', 'first_name', 'fathers_name'])

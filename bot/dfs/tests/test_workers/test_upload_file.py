@@ -37,9 +37,9 @@ class TestUploadFileWorker(unittest.TestCase):
         self.sleep_change_value = APIRateController()
         self.sna = event.Event()
         self.sna.set()
-        self.data = Data(self.tender_id, self.award_id, '123', 'awards',
+        self.data = Data(self.tender_id, self.award_id, '12345678', 'awards',
                          {'meta': {'id': self.document_id}, 'test_data': 'test_data'})
-        self.qualification_data = Data(self.tender_id, self.qualification_id, '123', 'qualifications',
+        self.qualification_data = Data(self.tender_id, self.qualification_id, '12345678', 'qualifications',
                                        {'meta': {'id': self.document_id}, 'test_data': 'test_data'})
         self.doc_service_client = DocServiceClient(host='127.0.0.1', port='80', user='', password='')
         self.worker = UploadFileToDocService(self.upload_to_doc_service_queue, self.upload_to_tender_queue,
@@ -225,7 +225,7 @@ class TestUploadFileWorker(unittest.TestCase):
             self.worker.remove_bad_data(self.data, Exception("test message"), True)
 
         self.worker.retry_upload_to_doc_service_queue.get.assert_called_once()
-        self.worker.process_tracker.update_items_and_tender.assert_called_with(self.data.tender_id, self.data.item_id,
+        self.worker.process_tracker.update_items_and_tender.assert_called_with(self.data.tender_id, self.data.award_id,
                                                                                self.document_id)
 
     def test_try_upload_to_doc_service(self):

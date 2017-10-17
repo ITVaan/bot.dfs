@@ -6,8 +6,8 @@ from gevent import event, spawn
 from mock import patch, MagicMock
 
 from bot.dfs.bridge.workers.base_worker import BaseWorker
-from base import BaseServersTest
-from utils import custom_sleep, AlmostAlwaysFalse
+from bot.dfs.tests.base import BaseServersTest
+from bot.dfs.tests.utils import custom_sleep, AlmostAlwaysFalse
 
 
 class TestBaseWorker(BaseServersTest):

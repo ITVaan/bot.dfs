@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Scanner(BaseWorker):
-    """ Edr API Data Bridge """
+    """ Edr API XmlData Bridge """
 
     def __init__(self, tenders_sync_client, filtered_tender_ids_queue, services_not_available, process_tracker,
                  sleep_change_value, delay=15):

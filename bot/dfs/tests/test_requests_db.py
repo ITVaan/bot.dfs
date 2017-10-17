@@ -16,18 +16,18 @@ class TestRequestsDb(BaseServersTest):
         del self.requests_db
 
     def test_add_request(self):
-        req_data = {"status": "pending", "tender_id": "111", "edr_code": "222"}
+        req_data = {"status": "pending", "tender_id": "111", "code": "222"}
         self.requests_db.add_sfs_request("1", req_data)
         self.assertEqual(self.redis.hgetall("requests:1"), req_data)
         self.assertEqual(self.redis.smembers("requests:pending"), set("1", ))
 
     def test_get_pending_requests(self):
-        req_data = {"status": "pending", "tender_id": "111", "edr_code": "222"}
+        req_data = {"status": "pending", "tender_id": "111", "code": "222"}
         self.requests_db.add_sfs_request("1", req_data)
         self.assertEqual(self.requests_db.get_pending_requests(), {"1": req_data})
 
     def test_complete_request(self):
-        req_data = {"status": "pending", "tender_id": "111", "edr_code": "222"}
+        req_data = {"status": "pending", "tender_id": "111", "code": "222"}
         self.requests_db.add_sfs_request("1", req_data)
         self.requests_db.complete_request("1")
         self.assertEqual(self.redis.hgetall("requests:1")['status'], "complete")
@@ -41,8 +41,8 @@ class TestRequestsDb(BaseServersTest):
         self.assertEqual(self.redis.get(award_key(tender_id, award_id)), request_id)
 
     def test_requests_within_range(self):
-        reqs_to_add = {uuid4().hex: {"status": "pending", "edr_code": uuid4().hex} for _ in range(4)}
+        reqs_to_add = {uuid4().hex: {"status": "pending", "code": uuid4().hex} for _ in range(4)}
         [self.requests_db.add_sfs_request(key, value) for (key, value) in reqs_to_add.items()]
-        for i in xrange(4):
+        for i in range(4):
             self.assertEqual([reqs_to_add.keys()[i]],
-                             self.requests_db.recent_requests_with(reqs_to_add.values()[i]['edr_code']))
+                             self.requests_db.recent_requests_with(reqs_to_add.values()[i]['code']))

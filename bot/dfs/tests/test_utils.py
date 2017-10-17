@@ -31,14 +31,14 @@ class TestUtils(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.redis_process = subprocess.Popen(['redis-server', '--port', str(cls.PORT)])
+        cls.redis_process = subprocess.Popen(['redis-server', '--port', str(cls.PORT), '--logfile /dev/null'])
         sleep(0.1)
         cls.redis = StrictRedis(port=cls.PORT)
 
     def setUp(self):
         self.process_tracker = ProcessTracker(self.db)
         self.tender_id = "111"
-        self.item_id = "222"
+        self.award_id = "222"
         self.document_id = "333"
 
     @classmethod
@@ -72,8 +72,8 @@ class TestUtils(TestCase):
     def test_set_item(self):
         self.assertEqual(self.process_tracker.processing_items, {})
         self.assertEqual(self.process_tracker.tender_documents_to_process, {})
-        self.process_tracker.set_item(self.tender_id, self.item_id, 1)
-        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.item_id): 1})
+        self.process_tracker.set_item(self.tender_id, self.award_id, 1)
+        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.award_id): 1})
         self.assertEqual(self.process_tracker.tender_documents_to_process, {db_key(self.tender_id): 1})
 
     def test_add_docs_amount_to_tender(self):
@@ -94,16 +94,16 @@ class TestUtils(TestCase):
 
     def test_check_processing_item(self):
         self.assertEqual(self.process_tracker.processing_items, {})
-        self.assertFalse(self.process_tracker.check_processing_item(self.tender_id, self.item_id))
-        self.process_tracker.set_item(self.tender_id, self.item_id)
-        self.assertTrue(self.process_tracker.check_processing_item(self.tender_id, self.item_id))
+        self.assertFalse(self.process_tracker.check_processing_item(self.tender_id, self.award_id))
+        self.process_tracker.set_item(self.tender_id, self.award_id)
+        self.assertTrue(self.process_tracker.check_processing_item(self.tender_id, self.award_id))
 
     def test_check_processed_item(self):
         self.assertEqual(self.process_tracker.processed_items, {})
-        self.assertFalse(self.process_tracker.check_processed_item(self.tender_id, self.item_id))
-        self.process_tracker.set_item(self.tender_id, self.item_id)
-        self.process_tracker.update_items_and_tender(self.tender_id, self.item_id, self.document_id)
-        self.assertTrue(self.process_tracker.check_processed_item(self.tender_id, self.item_id))
+        self.assertFalse(self.process_tracker.check_processed_item(self.tender_id, self.award_id))
+        self.process_tracker.set_item(self.tender_id, self.award_id)
+        self.process_tracker.update_items_and_tender(self.tender_id, self.award_id, self.document_id)
+        self.assertTrue(self.process_tracker.check_processed_item(self.tender_id, self.award_id))
 
     def test_check_processed_tender(self):
         self.assertFalse(self.process_tracker.check_processed_tenders(self.tender_id))
@@ -111,11 +111,11 @@ class TestUtils(TestCase):
         self.assertTrue(self.process_tracker.check_processed_tenders(self.tender_id))
 
     def test_update_processing_items(self):
-        self.process_tracker.processing_items = {item_key(self.tender_id, self.item_id): 2}
-        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.item_id): 2})
-        self.process_tracker._update_processing_items(self.tender_id, self.item_id, self.document_id)
-        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.item_id): 1})
-        self.process_tracker._update_processing_items(self.tender_id, self.item_id, self.document_id)
+        self.process_tracker.processing_items = {item_key(self.tender_id, self.award_id): 2}
+        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.award_id): 2})
+        self.process_tracker._update_processing_items(self.tender_id, self.award_id, self.document_id)
+        self.assertEqual(self.process_tracker.processing_items, {item_key(self.tender_id, self.award_id): 1})
+        self.process_tracker._update_processing_items(self.tender_id, self.award_id, self.document_id)
         self.assertEqual(self.process_tracker.processing_items, {})
 
     def test_check_412_function(self):
@@ -147,8 +147,8 @@ class TestUtils(TestCase):
 
     def test_item_key(self):
         tender_id = '123'
-        item_id = '456'
-        self.assertEqual(item_key(tender_id, item_id), '{}_{}'.format(tender_id, item_id))
+        award_id = '456'
+        self.assertEqual(item_key(tender_id, award_id), '{}_{}'.format(tender_id, award_id))
 
     def test_journal_context(self):
         params = {'text': '123'}

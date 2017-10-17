@@ -16,8 +16,8 @@ from restkit import ResourceError
 LOGGER = getLogger(__name__)
 
 
-def item_key(tender_id, item_id):
-    return '{}_{}'.format(tender_id, item_id)
+def item_key(tender_id, award_id):
+    return '{}_{}'.format(tender_id, award_id)
 
 
 def journal_context(record={}, params={}):
