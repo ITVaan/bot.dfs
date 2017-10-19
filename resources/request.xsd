@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:complexType name="request">
+        <xs:sequence>
+            <xs:element name="HNUM" type="xs:int" minOccurs="1"/>
+            <xs:element name="HTIN" type="xs:string" minOccurs="1"/>
+            <xs:element name="HLNAMEU" type="xs:string"/>
+            <xs:element name="HLNAME" type="xs:string"/>
+            <xs:element name="HPNAME" type="xs:string"/>    
+            <xs:element name="HFNAME" type="xs:string"/>
+            <xs:element name="ID" type="xs:string" minOccurs="1"/>
+            <xs:element name="HFILL" type="xs:dateTime" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="request" type="request"/>
+
+</xs:schema>

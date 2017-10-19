@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bot.dfs.bridge.sfs_worker import SfsWorker
+from bot.dfs.bridge.workers.sfs_worker import SfsWorker
 from gevent import monkey
 
 monkey.patch_all()
@@ -20,12 +20,11 @@ from constants import retry_mult
 
 from openprocurement_client.client import TendersClientSync as BaseTendersClientSync, TendersClient as BaseTendersClient
 from process_tracker import ProcessTracker
-from scanner import Scanner
-from request_for_reference import RequestForReference
+from bot.dfs.bridge.workers.scanner import Scanner
 from requests_db import RequestsDb
 from requests_to_sfs import RequestsToSfs
 from caching import Db
-from filter_tender import FilterTenders
+from bot.dfs.bridge.workers.filter_tender import FilterTenders
 from utils import journal_context, check_412
 from journal_msg_ids import (DATABRIDGE_RESTART_WORKER, DATABRIDGE_START, DATABRIDGE_DOC_SERVICE_CONN_ERROR)
 
@@ -50,6 +49,7 @@ class EdrDataBridge(object):
     """ Edr API Data Bridge """
 
     def __init__(self, config):
+        logger.info("initialization start")
         super(EdrDataBridge, self).__init__()
         self.config = config
 
@@ -71,7 +71,7 @@ class EdrDataBridge(object):
 
         # init queues for workers
         self.filtered_tender_ids_queue = Queue(maxsize=buffers_size)  # queue of tender IDs with appropriate status
-        self.edrpou_codes_queue = Queue(maxsize=buffers_size)  # queue with edrpou codes (Data objects stored in it)
+        self.edrpou_codes_queue = Queue(maxsize=buffers_size)  # queue with edrpou codes (XmlData objects stored in it)
         self.reference_queue = Queue(maxsize=buffers_size)  # queue of request IDs and documents
         self.upload_to_api_queue = Queue(maxsize=buffers_size)  # queue with data to upload back into central DB
 
@@ -111,13 +111,13 @@ class EdrDataBridge(object):
                                        sleep_change_value=self.sleep_change_value,
                                        delay=15)
 
-        self.request_for_reference = partial(RequestForReference.spawn,
-                                             reference_queue=self.reference_queue,
-                                             request_to_sfs=self.request_to_sfs,
-                                             request_db=self.request_db,
-                                             services_not_available=self.services_not_available,
-                                             sleep_change_value=self.sleep_change_value,
-                                             delay=self.delay)
+        # self.request_for_reference = partial(RequestForReference.spawn,
+        #                                      reference_queue=self.reference_queue,
+        #                                      request_to_sfs=self.request_to_sfs,
+        #                                      request_db=self.request_db,
+        #                                      services_not_available=self.services_not_available,
+        #                                      sleep_change_value=self.sleep_change_value,
+        #                                      delay=self.delay)
 
     def config_get(self, name):
         return self.config.get('main').get(name)
@@ -160,7 +160,9 @@ class EdrDataBridge(object):
     def _start_jobs(self):
         self.jobs = {'scanner': self.scanner(),
                      'filter_tender': self.filter_tender(),
-                     'request_for_reference': self.request_for_reference()}
+                     'sfs_reqs_worker': self.sfs_reqs_worker(),
+                     # 'request_for_reference': self.request_for_reference()
+                     }
 
     def launch(self):
         while True:
@@ -194,7 +196,7 @@ class EdrDataBridge(object):
 
     def check_and_revive_jobs(self):
         for name, job in self.jobs.items():
-            logger.info("{}.dead: {}".format(name, job.dead))
+            logger.debug("{}.dead: {}".format(name, job.dead))
             if job.dead:
                 self.revive_job(name)
 
@@ -205,7 +207,7 @@ class EdrDataBridge(object):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Edr API Data Bridge')
+    parser = argparse.ArgumentParser(description='Edr API XmlData Bridge')
     parser.add_argument('config', type=str, help='Path to configuration file')
     parser.add_argument('--tender', type=str, help='Tender id to sync', dest="tender_id")
     params = parser.parse_args()

@@ -19,11 +19,11 @@ from simplejson import dumps
 from gevent import event
 
 from bot.dfs.bridge.constants import tender_status, AWARD_STATUS
-from bot.dfs.bridge.filter_tender import FilterTenders
+from bot.dfs.bridge.workers.filter_tender import FilterTenders
 from bot.dfs.bridge.utils import item_key
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.data import Data
-from utils import custom_sleep, generate_request_id, ResponseMock
+from bot.dfs.tests.utils import custom_sleep, generate_request_id, ResponseMock
 from bot.dfs.bridge.bridge import TendersClientSync
 from bot.dfs.bridge.sleep_change_value import APIRateController
 
@@ -34,7 +34,7 @@ SPORE_COOKIES = ("a7afc9b1fc79e640f2487ba48243ca071c07a823d27"
 COOKIES_412 = ("b7afc9b1fc79e640f2487ba48243ca071c07a823d27"
                "8cf9b7adf0fae467a524747e3c6c6973262130fac2b"
                "96a11693fa8bd38623e4daee121f60b4301aef012c")
-CODES = ('14360570', '0013823', '23494714')
+CODES = ('14360570', '00138233', '23494714')
 
 
 def setup_routing(app, func, path='/api/2.3/spore', method='GET'):
@@ -64,7 +64,7 @@ def response_get_tender():
                                        'bid_id': '111',
                                        'status': AWARD_STATUS,
                                        'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': CODES[0],
-                                                                     "name": "company_name"}}]}]}})
+                                                                     "legalName": "company_name"}}]}]}})
 
 
 def generate_response():
@@ -106,7 +106,7 @@ class TestFilterWorker(unittest.TestCase):
 
     def awards(self, counter_id, counter_bid_id, status, sup_id):
         return {'id': self.award_ids[counter_id], 'bid_id': self.bid_ids[counter_bid_id], 'status': status,
-                'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': sup_id, "name": "company_name"}}]}
+                'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': sup_id, "legalName": "company_name"}}]}
 
     def bids(self, counter_id, edr_id):
         return {'id': self.bid_ids[counter_id],
@@ -144,7 +144,8 @@ class TestFilterWorker(unittest.TestCase):
                                                      'scheme': 'UA-ED',
                                                      'id': CODES[2],
                                                      "name": "company_name"}}]}]}}))]
-        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                    {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.assertItemsEqual(self.process_tracker.processing_items.keys(),
                               [item_key(self.tender_id, self.award_ids[0])])
@@ -154,7 +155,8 @@ class TestFilterWorker(unittest.TestCase):
         """ We must not lose tender after restart filter worker """
         gevent_sleep.side_effect = custom_sleep
         self.client.request.side_effect = [Exception(), self.response]
-        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                    {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.assertEqual(self.worker.sleep_change_value.time_between_requests, 0)
         gevent_sleep.assert_called_with_once(1)
@@ -167,7 +169,8 @@ class TestFilterWorker(unittest.TestCase):
         """ We must not lose tender after restart filter worker """
         gevent_sleep.side_effect = custom_sleep
         self.client.request.side_effect = [ResourceError(http_code=429), self.response]
-        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                    {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.sleep_change_value.increment_step = 2
         self.sleep_change_value.decrement_step = 1
         self.assertEqual(self.edrpou_codes_queue.get(), data)
@@ -193,7 +196,8 @@ class TestFilterWorker(unittest.TestCase):
                                             'procurementMethodType': 'aboveThresholdEU',
                                             'awards': [self.awards(0, 0, AWARD_STATUS, CODES[0]),
                                                        self.awards(1, 1, 'unsuccessful', CODES[2])]}}))]
-        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                    {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.assertItemsEqual(self.process_tracker.processing_items.keys(),
                               [item_key(self.tender_id, self.award_ids[0])])
@@ -213,7 +217,8 @@ class TestFilterWorker(unittest.TestCase):
                                        'procurementMethodType': 'aboveThresholdEU',
                                        'awards': [self.awards(i, i, AWARD_STATUS, CODES[0])]}})) for i in range(2)]
         for i in range(2):
-            data = Data(self.tender_id, self.award_ids[i], CODES[0], "company_name")
+            data = Data(self.tender_id, self.award_ids[i], CODES[0], "company_name",
+                        {"meta": {"sourceRequests": [self.request_ids[i]]}})
             self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.worker.immortal_jobs['prepare_data'].kill(timeout=1)
         self.assertItemsEqual(self.process_tracker.processing_items.keys(),
@@ -225,7 +230,8 @@ class TestFilterWorker(unittest.TestCase):
         filtered_tender_ids_queue = MagicMock()
         filtered_tender_ids_queue.peek.side_effect = [LoopExit(), self.tender_id]
         self.client.request.return_value = self.response
-        first_data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        first_data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                          {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.worker.filtered_tender_ids_queue = filtered_tender_ids_queue
         self.assertEqual(self.edrpou_codes_queue.get(), first_data)
         self.assertItemsEqual(self.process_tracker.processing_items.keys(),
@@ -247,15 +253,16 @@ class TestFilterWorker(unittest.TestCase):
                                            'bid_id': self.bid_ids[0],
                                            'status': AWARD_STATUS,
                                            'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': CODES[0],
-                                                                         "name": "company_name"}}],
+                                                                         "legalName": "company_name"}}],
                                            'lotID': '12345678'},
                                           {'id': self.award_ids[1],
                                            'bid_id': self.bid_ids[1],
                                            'status': 'cancelled',
                                            'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': CODES[1],
-                                                                         "name": "company_name"}}],
+                                                                         "legalName": "company_name"}}],
                                            'lotID': '123456789'}]}}))
-        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name")
+        data = Data(self.tender_id, self.award_ids[0], CODES[0], "company_name",
+                    {"meta": {"sourceRequests": [self.request_ids[0]]}})
         self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.assertItemsEqual(self.process_tracker.processing_items.keys(),
                               [item_key(self.tender_id, self.award_ids[0])])
@@ -290,7 +297,7 @@ class TestFilterWorker(unittest.TestCase):
         self.assertEqual(client.headers['Cookie'], 'SERVER_ID={}'.format(SPORE_COOKIES))
         worker = FilterTenders.spawn(client, filtered_tender_ids_queue, self.edrpou_codes_queue, self.process_tracker,
                                      MagicMock(), self.sleep_change_value)
-        data = Data('123', '124', CODES[0], "company_name")
+        data = Data('123', '124', CODES[0], "company_name", {"meta": {"sourceRequests": ['125']}})
         self.assertEqual(self.edrpou_codes_queue.get(), data)
         self.assertEqual(client.headers['Cookie'], 'SERVER_ID={}'.format(COOKIES_412))
         self.assertEqual(self.edrpou_codes_queue.qsize(), 0)
@@ -317,12 +324,13 @@ class TestFilterWorker(unittest.TestCase):
         self.assertItemsEqual(self.process_tracker.processing_items, {})
 
     def test_process_response_fail(self):
-        response = MagicMock(body_string=MagicMock(return_value="{\"data\": {\"id\": 1}}"))
+        response = MagicMock(body_string=MagicMock(return_value="""{"data": {"id": 1, "legalName": "cname"}}"""))
         self.worker.process_response(response)
 
     def test_process_response(self):
-        res_json = {"data": {"id": 1, "awards": [{"status": "active", "id": 2, "bid_id": 1,
-                                                  "suppliers": [{"identifier": {"scheme": "UA-EDR", "name": "cname",
-                                                                                "id": 1}}]}]}}
+        res_json = {"data": {"id": 1, "awards": [{"status": "active", "id": 2, "bid_id": 1, "name": "naaame",
+                                                  "suppliers": [
+                                                      {"identifier": {"scheme": "UA-EDR", "legalName": "cname",
+                                                                      "id": 12345678}}]}]}}
         response = MagicMock(body_string=MagicMock(return_value=dumps(res_json)))
         self.worker.process_response(response)

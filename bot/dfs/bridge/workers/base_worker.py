@@ -8,8 +8,8 @@ import gevent
 
 from gevent import Greenlet
 
-from utils import journal_context
-from journal_msg_ids import DATABRIDGE_START_UPLOAD
+from bot.dfs.bridge.utils import journal_context
+from bot.dfs.bridge.journal_msg_ids import DATABRIDGE_START_UPLOAD
 
 logger = logging.getLogger(__name__)
 

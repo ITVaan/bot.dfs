@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from bot.dfs.bridge.data import Data
 from gevent import monkey
+from mock import patch
 
 monkey.patch_all()
 
@@ -14,7 +16,7 @@ from bot.dfs.bridge.constants import tender_status, AWARD_STATUS
 from bot.dfs.bridge.sleep_change_value import APIRateController
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.bridge import EdrDataBridge
-from utils import generate_request_id
+from utils import generate_request_id, custom_sleep, sleep_until_done, is_working_filter
 
 CODES = ('14360570', '0013823', '23494714')
 award_ids = [uuid.uuid4().hex for _ in range(5)]
@@ -43,7 +45,7 @@ def doc_response():
 
 def awards(counter_id, counter_bid_id, status, sup_id):
     return {'id': award_ids[counter_id], 'bid_id': bid_ids[counter_bid_id], 'status': status,
-            'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': sup_id, "name": "company_name"}}]}
+            'suppliers': [{'identifier': {'scheme': 'UA-EDR', 'id': sup_id, "legalName": "company_name"}}]}
 
 
 def bids(counter_id, edr_id):
@@ -98,18 +100,18 @@ class EndToEndTest(BaseServersTest):
     def tearDown(self):
         super(EndToEndTest, self).tearDown()
         self.redis.flushall()
-        #
-        # @patch('gevent.sleep')
-        # def test_scanner_and_filter(self, gevent_sleep):
-        #     gevent_sleep.side_effect = custom_sleep
-        #     self.worker = EdrDataBridge(config)
-        #     setup_routing(self.api_server_bottle, get_tenders_response, path='/api/2.3/tenders')
-        #     setup_routing(self.api_server_bottle, get_tender_response, path='/api/2.3/tenders/123')
-        #     self.worker.scanner()
-        #     self.worker.filter_tender()
-        #     data = Data('123', award_ids[2], CODES[2], "company_name")
-        #     sleep(5)
-        #     # sleep_until_done(self.worker, is_working_filter)
-        #     self.assertEqual(self.worker.edrpou_codes_queue.get(), data)
-        #     self.assertEqual(self.worker.edrpou_codes_queue.qsize(), 0)
-        #     self.assertEqual(self.worker.filtered_tender_ids_queue.qsize(), 0)
+
+    @patch('gevent.sleep')
+    def test_scanner_and_filter(self, gevent_sleep):
+        gevent_sleep.side_effect = custom_sleep
+        self.worker = EdrDataBridge(config)
+        setup_routing(self.api_server_bottle, get_tenders_response, path='/api/2.3/tenders')
+        setup_routing(self.api_server_bottle, get_tender_response, path='/api/2.3/tenders/123')
+        self.worker.scanner()
+        self.worker.filter_tender()
+        data = Data('123', award_ids[2], CODES[2], "company_name", {"meta": {"sourceRequests": [request_ids[0]]}})
+        # sleep(5)
+        sleep_until_done(self.worker, is_working_filter)
+        self.assertEqual(self.worker.edrpou_codes_queue.get(), data)
+        self.assertEqual(self.worker.edrpou_codes_queue.qsize(), 0)
+        self.assertEqual(self.worker.filtered_tender_ids_queue.qsize(), 0)

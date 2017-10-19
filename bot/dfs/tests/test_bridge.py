@@ -25,7 +25,7 @@ class TestBridgeWorker(BaseServersTest):
         self.assertFalse(self.worker.initialization_event.is_set())
         self.assertEqual(self.worker.process_tracker.processing_items, {})
         self.assertEqual(self.worker.db._backend, "redis")
-        self.assertEqual(self.worker.db._db_name, 0)
+        self.assertEqual(self.worker.db._db_name, 1)
         self.assertEqual(self.worker.db._port, "16379")
         self.assertEqual(self.worker.db._host, "127.0.0.1")
 
@@ -43,33 +43,33 @@ class TestBridgeWorker(BaseServersTest):
                           'api_version': config['main']['tenders_api_version']})
 
     def test_start_jobs(self):
-        scanner, filter_tender, request_for_reference = [MagicMock(return_value=i) for i in range(3)]
+        scanner, filter_tender, sfs_reqs_worker = [MagicMock(return_value=i) for i in range(3)]
         self.worker.scanner = scanner
         self.worker.filter_tender = filter_tender
-        self.worker.request_for_reference = request_for_reference
+        self.worker.sfs_reqs_worker = sfs_reqs_worker
 
         self.worker._start_jobs()
         # check that all jobs were started
         self.assertTrue(scanner.called)
         self.assertTrue(filter_tender.called)
-        self.assertTrue(request_for_reference.called)
+        self.assertTrue(sfs_reqs_worker.called)
 
         self.assertEqual(self.worker.jobs['scanner'], 0)
         self.assertEqual(self.worker.jobs['filter_tender'], 1)
-        self.assertEqual(self.worker.jobs['request_for_reference'], 2)
+        self.assertEqual(self.worker.jobs['sfs_reqs_worker'], 2)
 
     @patch('gevent.sleep')
     def test_bridge_run(self, sleep):
-        scanner, filter_tender, request_for_reference = [MagicMock() for _ in range(3)]
+        scanner, filter_tender, sfs_reqs_worker = [MagicMock() for _ in range(3)]
         self.worker.scanner = scanner
         self.worker.filter_tender = filter_tender
-        self.worker.request_for_reference = request_for_reference
+        self.worker.sfs_reqs_worker = sfs_reqs_worker
         self.worker.check_and_revive_jobs = MagicMock()
         with patch('__builtin__.True', AlmostAlwaysTrue(10)):
             self.worker.run()
         self.assertEqual(self.worker.scanner.call_count, 1)
         self.assertEqual(self.worker.filter_tender.call_count, 1)
-        self.assertEqual(self.worker.request_for_reference.call_count, 1)
+        self.assertEqual(self.worker.sfs_reqs_worker.call_count, 1)
 
     def test_openprocurement_api_failure(self):
         self.api_server.stop()

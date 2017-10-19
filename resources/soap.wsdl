@@ -1,0 +1,704 @@
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:tns="http://swined/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/"
+                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://swined/">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+        <h1>Single Window of Electronic Documents - SWinED</h1>
+    </wsdl:documentation>
+    <wsdl:types>
+        <s:schema elementFormDefault="qualified" targetNamespace="http://swined/">
+            <s:element name="Mark">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="docs" type="tns:ArrayOfProcessedDocument"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfProcessedDocument">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="ProcessedDocument" nillable="true"
+                               type="tns:ProcessedDocument"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="ProcessedDocument">
+                <s:sequence>
+                    <s:element minOccurs="1" maxOccurs="1" name="docCd" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="docId" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="docType" type="tns:DocumentType"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="ticket" type="s:base64Binary"/>
+                </s:sequence>
+            </s:complexType>
+            <s:simpleType name="DocumentType">
+                <s:restriction base="s:string">
+                    <s:enumeration value="Original"/>
+                    <s:enumeration value="Response"/>
+                </s:restriction>
+            </s:simpleType>
+            <s:element name="MarkResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="MarkResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="errorDocIdx" type="s:int"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:simpleType name="ProcessResult">
+                <s:restriction base="s:string">
+                    <s:enumeration value="SWINED_OK"/>
+                    <s:enumeration value="SWINED_TEMPORARY_UNAVAILABLE"/>
+                    <s:enumeration value="SWINED_EDRPOU_INVALID"/>
+                    <s:enumeration value="SWINED_EMPTY_DATA"/>
+                    <s:enumeration value="SWINED_CRYPT_ERROR_UNSIGN"/>
+                    <s:enumeration value="SWINED_CRYPT_ERROR_DECRYPT"/>
+                    <s:enumeration value="SWINED_CRYPT_ERROR_INTERNAL"/>
+                    <s:enumeration value="SWINED_SIGN_ABSENT"/>
+                    <s:enumeration value="SWINED_SIGN_EDRPOU_MISCOMPARE"/>
+                    <s:enumeration value="SWINED_DOC_EDRPOU_INVALID"/>
+                    <s:enumeration value="SWINED_DOC_ID_INVALID"/>
+                    <s:enumeration value="SWINED_DOC_EMPTY"/>
+                    <s:enumeration value="SWINED_DOC_ALREADY_REGISTERED"/>
+                    <s:enumeration value="SWINED_ORIG_DOC_ID_INVALID"/>
+                    <s:enumeration value="SWINED_ORIG_DOC_ABSENT"/>
+                    <s:enumeration value="SWINED_DOC_TYPE_INVALID"/>
+                    <s:enumeration value="SWINED_DOC_TOO_BIG"/>
+                    <s:enumeration value="SWINED_TICKET_INVALID_SIGNS_SEQUENCE"/>
+                    <s:enumeration value="SWINED_TICKET_INVALID_CONTENT"/>
+                    <s:enumeration value="SWINED_TICKET_DOC_ABSENT"/>
+                    <s:enumeration value="SWINED_CRYPTOLIB_ABSENT"/>
+                    <s:enumeration value="SWINED_CERTIFICATE_INVALID"/>
+                    <s:enumeration value="SWINED_CHUNK_NUMBER_INVALID"/>
+                    <s:enumeration value="SWINED_CHUNK_NUMBER_DUPLICATED"/>
+                    <s:enumeration value="SWINED_CHUNKS_MISMATCHED"/>
+                </s:restriction>
+            </s:simpleType>
+            <s:element name="Post">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="senderEDRPOU" type="s:string"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="docsType" type="tns:DocumentType"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="docs" type="tns:ArrayOfDocumentInData"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfDocumentInData">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="DocumentInData" nillable="true"
+                               type="tns:DocumentInData"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="DocumentInData">
+                <s:sequence>
+                    <s:element minOccurs="1" maxOccurs="1" name="dept" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="docId" type="s:string"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="document" type="s:base64Binary"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="EDRPOU" type="s:string"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="originalDocId" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="task" type="s:int"/>
+                </s:sequence>
+            </s:complexType>
+            <s:element name="PostResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="PostResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="errorDocIdx" type="s:int"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="PostChunk">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="senderEDRPOU" type="s:string"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="senderDept" type="s:int"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="docsType" type="tns:DocumentType"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="doc" type="tns:DocumentInChunkData"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="DocumentInChunkData">
+                <s:complexContent mixed="false">
+                    <s:extension base="tns:DocumentInData">
+                        <s:sequence>
+                            <s:element minOccurs="1" maxOccurs="1" name="chunkNumber" type="s:int"/>
+                            <s:element minOccurs="1" maxOccurs="1" name="final" type="s:boolean"/>
+                        </s:sequence>
+                    </s:extension>
+                </s:complexContent>
+            </s:complexType>
+            <s:element name="PostChunkResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="PostChunkResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="lastChunkNum" type="s:int"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="Receive">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="caName" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="cert" type="s:base64Binary"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="ReceiveResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="ReceiveResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="restPresent" type="s:boolean"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="docs" type="tns:ArrayOfDocumentOutData"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfDocumentOutData">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="DocumentOutData" nillable="true"
+                               type="tns:DocumentOutData"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="DocumentOutData">
+                <s:sequence>
+                    <s:element minOccurs="1" maxOccurs="1" name="deliver" type="s:dateTime"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="docCd" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="docId" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="docType" type="tns:DocumentType"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="document" type="s:base64Binary"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="income" type="s:dateTime"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="originalDocId" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="recipientDept" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="senderDept" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="senderEDRPOU" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="task" type="s:int"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="ticket" type="s:base64Binary"/>
+                </s:sequence>
+            </s:complexType>
+            <s:element name="ReceiveChunk">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="docType" type="tns:DocumentType"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="docCd" type="s:int"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="chunkNumber" type="s:int"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="caName" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="cert" type="s:base64Binary"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="ReceiveChunkResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="ReceiveChunkResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="doc" type="tns:DocumentOutChunkData"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="DocumentOutChunkData">
+                <s:complexContent mixed="false">
+                    <s:extension base="tns:DocumentOutData">
+                        <s:sequence>
+                            <s:element minOccurs="1" maxOccurs="1" name="chunkNumber" type="s:int"/>
+                            <s:element minOccurs="1" maxOccurs="1" name="final" type="s:boolean"/>
+                        </s:sequence>
+                    </s:extension>
+                </s:complexContent>
+            </s:complexType>
+            <s:element name="List">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="recipientDept" type="s:int"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="procAllDepts" type="s:boolean"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="ListResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="ListResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="list" type="tns:ArrayOfDocumentId"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfDocumentId">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="DocumentId" nillable="true"
+                               type="tns:DocumentId"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="DocumentId">
+                <s:sequence>
+                    <s:element minOccurs="1" maxOccurs="1" name="docCd" type="s:int"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="docType" type="tns:DocumentType"/>
+                </s:sequence>
+            </s:complexType>
+            <s:element name="ListChunked">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="recipientDept" type="s:int"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="procAllDepts" type="s:boolean"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="ListChunkedResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="ListChunkedResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="list" type="tns:ArrayOfDocumentId"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="Load">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="list" type="tns:ArrayOfDocumentId"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="caName" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="cert" type="s:base64Binary"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="LoadResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="LoadResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="restPreset" type="s:boolean"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="docs" type="tns:ArrayOfDocumentOutData"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="Check">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="recipientEDRPOU" type="s:string"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="CheckResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="CheckResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="1" maxOccurs="1" name="qtDocs" type="s:int"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="CheckAcquired">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="senderEDRPOU" type="s:string"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="list" type="tns:ArrayOfDocumentIdAcq"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfDocumentIdAcq">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="DocumentIdAcq" nillable="true"
+                               type="tns:DocumentIdAcq"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="DocumentIdAcq">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="1" name="docId" type="s:string"/>
+                    <s:element minOccurs="1" maxOccurs="1" name="docType" type="tns:DocumentType"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="originalDocId" type="s:string"/>
+                </s:sequence>
+            </s:complexType>
+            <s:element name="CheckAcquiredResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="CheckAcquiredResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="acquired" type="tns:ArrayOfBoolean"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfBoolean">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="boolean" type="s:boolean"/>
+                </s:sequence>
+            </s:complexType>
+            <s:element name="GetCertificate">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="0" maxOccurs="1" name="caName" type="s:string"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:element name="GetCertificateResponse">
+                <s:complexType>
+                    <s:sequence>
+                        <s:element minOccurs="1" maxOccurs="1" name="GetCertificateResult" type="tns:ProcessResult"/>
+                        <s:element minOccurs="0" maxOccurs="1" name="certs" type="tns:ArrayOfCertificate"/>
+                    </s:sequence>
+                </s:complexType>
+            </s:element>
+            <s:complexType name="ArrayOfCertificate">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="unbounded" name="Certificate" nillable="true"
+                               type="tns:Certificate"/>
+                </s:sequence>
+            </s:complexType>
+            <s:complexType name="Certificate">
+                <s:sequence>
+                    <s:element minOccurs="0" maxOccurs="1" name="caName" type="s:string"/>
+                    <s:element minOccurs="0" maxOccurs="1" name="cert" type="s:base64Binary"/>
+                </s:sequence>
+            </s:complexType>
+        </s:schema>
+    </wsdl:types>
+    <wsdl:message name="MarkSoapIn">
+        <wsdl:part name="parameters" element="tns:Mark"/>
+    </wsdl:message>
+    <wsdl:message name="MarkSoapOut">
+        <wsdl:part name="parameters" element="tns:MarkResponse"/>
+    </wsdl:message>
+    <wsdl:message name="PostSoapIn">
+        <wsdl:part name="parameters" element="tns:Post"/>
+    </wsdl:message>
+    <wsdl:message name="PostSoapOut">
+        <wsdl:part name="parameters" element="tns:PostResponse"/>
+    </wsdl:message>
+    <wsdl:message name="PostChunkSoapIn">
+        <wsdl:part name="parameters" element="tns:PostChunk"/>
+    </wsdl:message>
+    <wsdl:message name="PostChunkSoapOut">
+        <wsdl:part name="parameters" element="tns:PostChunkResponse"/>
+    </wsdl:message>
+    <wsdl:message name="ReceiveSoapIn">
+        <wsdl:part name="parameters" element="tns:Receive"/>
+    </wsdl:message>
+    <wsdl:message name="ReceiveSoapOut">
+        <wsdl:part name="parameters" element="tns:ReceiveResponse"/>
+    </wsdl:message>
+    <wsdl:message name="ReceiveChunkSoapIn">
+        <wsdl:part name="parameters" element="tns:ReceiveChunk"/>
+    </wsdl:message>
+    <wsdl:message name="ReceiveChunkSoapOut">
+        <wsdl:part name="parameters" element="tns:ReceiveChunkResponse"/>
+    </wsdl:message>
+    <wsdl:message name="ListSoapIn">
+        <wsdl:part name="parameters" element="tns:List"/>
+    </wsdl:message>
+    <wsdl:message name="ListSoapOut">
+        <wsdl:part name="parameters" element="tns:ListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="ListChunkedSoapIn">
+        <wsdl:part name="parameters" element="tns:ListChunked"/>
+    </wsdl:message>
+    <wsdl:message name="ListChunkedSoapOut">
+        <wsdl:part name="parameters" element="tns:ListChunkedResponse"/>
+    </wsdl:message>
+    <wsdl:message name="LoadSoapIn">
+        <wsdl:part name="parameters" element="tns:Load"/>
+    </wsdl:message>
+    <wsdl:message name="LoadSoapOut">
+        <wsdl:part name="parameters" element="tns:LoadResponse"/>
+    </wsdl:message>
+    <wsdl:message name="CheckSoapIn">
+        <wsdl:part name="parameters" element="tns:Check"/>
+    </wsdl:message>
+    <wsdl:message name="CheckSoapOut">
+        <wsdl:part name="parameters" element="tns:CheckResponse"/>
+    </wsdl:message>
+    <wsdl:message name="CheckAcquiredSoapIn">
+        <wsdl:part name="parameters" element="tns:CheckAcquired"/>
+    </wsdl:message>
+    <wsdl:message name="CheckAcquiredSoapOut">
+        <wsdl:part name="parameters" element="tns:CheckAcquiredResponse"/>
+    </wsdl:message>
+    <wsdl:message name="GetCertificateSoapIn">
+        <wsdl:part name="parameters" element="tns:GetCertificate"/>
+    </wsdl:message>
+    <wsdl:message name="GetCertificateSoapOut">
+        <wsdl:part name="parameters" element="tns:GetCertificateResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="SWinEDSoap">
+        <wsdl:operation name="Mark">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Позначити документи як оброблені
+            </wsdl:documentation>
+            <wsdl:input message="tns:MarkSoapIn"/>
+            <wsdl:output message="tns:MarkSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="Post">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Передати документи</wsdl:documentation>
+            <wsdl:input message="tns:PostSoapIn"/>
+            <wsdl:output message="tns:PostSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="PostChunk">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Передати частину документа
+            </wsdl:documentation>
+            <wsdl:input message="tns:PostChunkSoapIn"/>
+            <wsdl:output message="tns:PostChunkSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="Receive">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Отримати вхідну кореспонденцію
+            </wsdl:documentation>
+            <wsdl:input message="tns:ReceiveSoapIn"/>
+            <wsdl:output message="tns:ReceiveSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="ReceiveChunk">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Отримати частину документа
+            </wsdl:documentation>
+            <wsdl:input message="tns:ReceiveChunkSoapIn"/>
+            <wsdl:output message="tns:ReceiveChunkSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="List">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Отримати список вхідних документів
+            </wsdl:documentation>
+            <wsdl:input message="tns:ListSoapIn"/>
+            <wsdl:output message="tns:ListSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="ListChunked">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+                Отримати список вхідних документів, що передаються частинами
+            </wsdl:documentation>
+            <wsdl:input message="tns:ListChunkedSoapIn"/>
+            <wsdl:output message="tns:ListChunkedSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="Load">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+                Отримати вхідну кореспонденцію за списком документів
+            </wsdl:documentation>
+            <wsdl:input message="tns:LoadSoapIn"/>
+            <wsdl:output message="tns:LoadSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="Check">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Перевірити наявність вхідної
+                кореспонденції
+            </wsdl:documentation>
+            <wsdl:input message="tns:CheckSoapIn"/>
+            <wsdl:output message="tns:CheckSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="CheckAcquired">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+                Отримати підтвердження отримання документів одержувачем
+            </wsdl:documentation>
+            <wsdl:input message="tns:CheckAcquiredSoapIn"/>
+            <wsdl:output message="tns:CheckAcquiredSoapOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetCertificate">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Отримати сертифікат Центрального
+                Поштамта
+            </wsdl:documentation>
+            <wsdl:input message="tns:GetCertificateSoapIn"/>
+            <wsdl:output message="tns:GetCertificateSoapOut"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="SWinEDSoap" type="tns:SWinEDSoap">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Mark">
+            <soap:operation soapAction="http://swined/Mark" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Post">
+            <soap:operation soapAction="http://swined/Post" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="PostChunk">
+            <soap:operation soapAction="http://swined/PostChunk" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Receive">
+            <soap:operation soapAction="http://swined/Receive" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="ReceiveChunk">
+            <soap:operation soapAction="http://swined/ReceiveChunk" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="List">
+            <soap:operation soapAction="http://swined/List" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="ListChunked">
+            <soap:operation soapAction="http://swined/ListChunked" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Load">
+            <soap:operation soapAction="http://swined/Load" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Check">
+            <soap:operation soapAction="http://swined/Check" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="CheckAcquired">
+            <soap:operation soapAction="http://swined/CheckAcquired" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetCertificate">
+            <soap:operation soapAction="http://swined/GetCertificate" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="SWinEDSoap12" type="tns:SWinEDSoap">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Mark">
+            <soap12:operation soapAction="http://swined/Mark" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Post">
+            <soap12:operation soapAction="http://swined/Post" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="PostChunk">
+            <soap12:operation soapAction="http://swined/PostChunk" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Receive">
+            <soap12:operation soapAction="http://swined/Receive" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="ReceiveChunk">
+            <soap12:operation soapAction="http://swined/ReceiveChunk" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="List">
+            <soap12:operation soapAction="http://swined/List" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="ListChunked">
+            <soap12:operation soapAction="http://swined/ListChunked" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Load">
+            <soap12:operation soapAction="http://swined/Load" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Check">
+            <soap12:operation soapAction="http://swined/Check" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="CheckAcquired">
+            <soap12:operation soapAction="http://swined/CheckAcquired" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetCertificate">
+            <soap12:operation soapAction="http://swined/GetCertificate" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="SWinED">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <h1>Single Window of Electronic Documents - SWinED</h1>
+        </wsdl:documentation>
+        <wsdl:port name="SWinEDSoap" binding="tns:SWinEDSoap">
+            <soap:address location="http://obmen.sfs.gov.ua/SwinEd.asmx"/>
+        </wsdl:port>
+        <wsdl:port name="SWinEDSoap12" binding="tns:SWinEDSoap12">
+            <soap12:address location="http://obmen.sfs.gov.ua/SwinEd.asmx"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

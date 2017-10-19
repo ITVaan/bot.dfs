@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-import os
 import subprocess
 import unittest
-
 from time import sleep
-from redis import StrictRedis
-from gevent.pywsgi import WSGIServer
-from bottle import Bottle, request, response
+
+import os
 
 from bot.dfs.bridge.caching import Db
+from bottle import Bottle, request, response
+from gevent.pywsgi import WSGIServer
+from redis import StrictRedis
 
 config = {
     'main':
@@ -21,7 +21,7 @@ config = {
             'empty_stack_sync_delay': 101,
             'on_error_sleep_delay': 5,
             'api_token': "api_token",
-            'cache_db_name': 0,
+            'cache_db_name': 1,
             'cache_host': '127.0.0.1',
             'cache_port': '16379',
             'time_to_live': 1800,
@@ -45,7 +45,7 @@ class BaseServersTest(unittest.TestCase):
         cls.redis_process = subprocess.Popen(['redis-server', '--port',
                                               str(config['main']['cache_port']), '--logfile /dev/null'])
         sleep(0.1)
-        cls.redis = StrictRedis(port=str(config['main']['cache_port']))
+        cls.redis = StrictRedis(port=str(config['main']['cache_port']), db=1)
         cls.db = Db(config)
 
         # start servers

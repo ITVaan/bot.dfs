@@ -23,19 +23,12 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
 
-  journal:
-    class: ExtendedJournalHandler.ExtendedJournalHandler
-    level: INFO
-    SYSLOG_IDENTIFIER: BOT_IDENTIFICATION_BRIDGE
-    TENDERS_API_VERSION: "${options['tenders_api_version']}"
-    TENDERS_API_URL: ${options['tenders_api_server']}
-
 loggers:
   openprocurement.bot.identification.databridge:
-    handlers: [console, journal]
+    handlers: [console]
     propagate: no
     level: DEBUG
 
   "":
-    handlers: [console, journal]
+    handlers: [console]
     level: DEBUG
