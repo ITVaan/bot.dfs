@@ -31,7 +31,7 @@ class SfsWorker(BaseWorker):
     def send_sfs_request(self):
         while not self.exit:
             data = self.sfs_reqs_queue.get()
-            logger.info(u"got data from edrpou_codes_queue: {}".format(data))
+            logger.info(u"Got data from edrpou_codes_queue: {}".format(data))
             recent_reqs = self.requests_db.recent_requests_with(data.code)
             logger.info("Recent requests: {}".format(recent_reqs))
             if not recent_reqs:
@@ -54,6 +54,7 @@ class SfsWorker(BaseWorker):
         logger.info(u"Processing existing request: {};\t{}".format(data, existing_request_id))
         """bind award to existing request, load the answer which is already there into Central Database"""
         completed_reqs = self.requests_db.recent_complete_requests_with(data.code)
+        logger.info("Put {} into upload queue".format(data))
         if completed_reqs:  # this way we upload the completed request, not pending one
             self.requests_db.add_award(data.tender_id, data.award_id, completed_reqs[0], data)
             self.upload_to_api_queue.put((data, self.requests_db.get_request(completed_reqs[0])))

@@ -69,10 +69,6 @@ def is_code_invalid(code):
 
 
 def is_code_valid(code):
-    return is_code_valid(code) or is_passport_valid(code) or is_vatin_valid(code)
-
-
-def is_code_valid(code):
     return (len(str(code)) == 8 and
             (type(code) == int or (type(code) == str and code.isdigit()) or (type(code) == unicode and code.isdigit())))
 

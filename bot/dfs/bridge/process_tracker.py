@@ -11,25 +11,10 @@ class ProcessTracker(object):
         self.processing_items = {}
         self.processed_items = {}
         self._db = db
-        self.tender_documents_to_process = {}
         self.ttl = ttl
 
-    def set_item(self, tender_id, award_id, docs_amount=0):
+    def set_item(self, tender_id, award_id, docs_amount=1):
         self.processing_items[item_key(tender_id, award_id)] = docs_amount
-        self._add_docs_amount_to_tender(tender_id, docs_amount)
-
-    def _add_docs_amount_to_tender(self, tender_id, docs_amount):
-        if self.tender_documents_to_process.get(tender_id):
-            self.tender_documents_to_process[tender_id] += docs_amount
-        else:
-            self.tender_documents_to_process[tender_id] = docs_amount
-
-    def _remove_docs_amount_from_tender(self, tender_id):
-        if self.tender_documents_to_process[tender_id] > 1:
-            self.tender_documents_to_process[tender_id] -= 1
-        else:
-            self._db.put(db_key(tender_id), datetime.now().isoformat(), self.ttl)
-            del self.tender_documents_to_process[tender_id]
 
     def check_processing_item(self, tender_id, award_id):
         """Check if current tender_id, award_id is processing"""
@@ -62,4 +47,3 @@ class ProcessTracker(object):
 
     def update_items_and_tender(self, tender_id, award_id, document_id):
         self._update_processing_items(tender_id, award_id, document_id)
-        self._remove_docs_amount_from_tender(tender_id)

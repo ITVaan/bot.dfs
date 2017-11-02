@@ -1,4 +1,8 @@
 # coding=utf-8
+from gevent import event
+from gevent.queue import Queue
+from mock import patch
+
 from bot.dfs.bridge.data import Data
 from bot.dfs.bridge.process_tracker import ProcessTracker
 from bot.dfs.bridge.requests_db import RequestsDb
@@ -6,8 +10,7 @@ from bot.dfs.bridge.requests_to_sfs import RequestsToSfs
 from bot.dfs.bridge.sleep_change_value import APIRateController
 from bot.dfs.bridge.workers.sfs_worker import SfsWorker
 from bot.dfs.tests.base import BaseServersTest
-from gevent import event
-from gevent.queue import Queue
+from bot.dfs.tests.utils import AlmostAlwaysFalse
 
 
 class TestSfsWorker(BaseServersTest):
@@ -62,3 +65,19 @@ class TestSfsWorker(BaseServersTest):
         self.worker.requests_db.add_sfs_request(req_id, {"code": data.code, "status": "pending"})
         self.worker.requests_db.complete_request(req_id)
         self.worker.process_existing_request(data, req_id)
+
+    def test_send_sfs_request(self):
+        sfs_client = RequestsToSfs()
+        sfs_reqs_queue = Queue(10)
+        upload_to_api_queue = Queue(10)
+        process_tracker = ProcessTracker()
+        requests_db = RequestsDb(self.db)
+        services_not_available = event.Event()
+        services_not_available.set()
+        sleep_change_value = APIRateController()
+        data = Data(1, 1, 12345678, "comname", {"meta": {"sourceRequests": []}})
+        sfs_reqs_queue.put(data)
+        worker = SfsWorker(sfs_client, sfs_reqs_queue, upload_to_api_queue,
+                           process_tracker, requests_db, services_not_available, sleep_change_value, 0)
+        with patch.object(worker, 'exit', AlmostAlwaysFalse()):
+            worker.send_sfs_request()

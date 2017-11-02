@@ -86,7 +86,8 @@ class UploadFileToDocService(BaseWorker):
 
     def remove_bad_data(self, doc_and_tenders, e, is_retry):
         logger.exception('Exception while uploading file to doc service {} doc_id: {}. Message: {}. {}'.
-                         format(doc_and_tenders, doc_and_tenders[0]["meta"]["id"], e, "Removed tender data" if is_retry else ""),
+                         format(doc_and_tenders, doc_and_tenders[0]["meta"]["id"], e,
+                                "Removed tender data" if is_retry else ""),
                          extra=journal_context({"MESSAGE_ID": DATABRIDGE_UNSUCCESS_UPLOAD_TO_DOC_SERVICE},
                                                doc_and_tenders[1][0].log_params()))
         if is_retry:

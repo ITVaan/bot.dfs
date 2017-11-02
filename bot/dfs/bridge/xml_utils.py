@@ -2,11 +2,11 @@
 import os
 import xmlschema
 import logging.config
-
 from datetime import datetime
 from xml.dom import minidom
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
+
 
 logger = logging.getLogger(__name__)
 

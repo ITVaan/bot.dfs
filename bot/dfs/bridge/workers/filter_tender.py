@@ -73,8 +73,8 @@ class FilterTenders(BaseWorker):
 
     def process_response(self, response):
         tender = loads(response.body_string())['data']
-        for aw in active_award(tender):
-            logger.info("active award {}".format(active_award(tender)))
+        for aw in self.active_awards(tender):
+            logger.info("active award {}".format(aw['id']))
             for code in get_codes(aw):
                 logger.info("code {}".format(code))
                 data = Data(tender['id'], aw['id'], code[0], code[1],
@@ -87,11 +87,19 @@ class FilterTenders(BaseWorker):
                     tender['id'], aw['bid_id'], aw['id']),
                     extra=journal_context({"MESSAGE_ID": DATABRIDGE_TENDER_NOT_PROCESS},
                                           journal_item_params(tender['id'], aw['bid_id'], aw['id'])))
-            break
         else:
             logger.info('Tender {} is already in process or was processed.'.format(tender['id']),
                         extra=journal_context({"MESSAGE_ID": DATABRIDGE_TENDER_NOT_PROCESS},
                                               {"TENDER_ID": tender['id']}))
+
+    def should_process_award(self, tender, award):
+        return (award.get('status') == 'active' and
+                not [doc for doc in award.get('documents', []) if doc.get('title') == 'sfs_reference.yaml'] and
+                # check_related_lot_status(tender, award) and
+                not self.process_tracker.check_processing_item(tender['id'], award['id']))
+
+    def active_awards(self, tender):
+        return [aw for aw in tender.get('awards', []) if self.should_process_award(tender, aw)]
 
     def _start_jobs(self):
         return {'prepare_data': spawn(self.prepare_data)}
@@ -101,10 +109,6 @@ def journal_item_params(tender_id, bid_id, award_id):
     return {"TENDER_ID": tender_id, "BID_ID": bid_id, "AWARD_ID": award_id}
 
 
-def active_award(tender):
-    return [aw for aw in tender.get('awards', []) if aw.get('status') == 'active']
-
-
 def get_codes(award):
     return [(supplier['identifier']['id'], supplier['identifier']['legalName'])
             for supplier in award['suppliers'] if is_valid(supplier)]
@@ -112,3 +116,12 @@ def get_codes(award):
 
 def is_valid(supplier):
     return is_code_valid(supplier['identifier']['id']) and supplier['identifier']['scheme'] == scheme
+
+
+def check_related_lot_status(tender, award):
+    """Check if related lot not in status cancelled"""
+    lot_id = award.get('lotID')
+    if lot_id:
+        if [l['status'] for l in tender.get('lots', []) if l['id'] == lot_id][0] != 'active':
+            return False
+    return True

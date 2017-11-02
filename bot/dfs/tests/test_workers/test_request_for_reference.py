@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-from uuid import uuid4
 
-from bot.dfs.bridge.data import Data
 from gevent import event, monkey
 
 monkey.patch_all()
 
 import datetime
+from uuid import uuid4
 from gevent.queue import Queue
-from bot.dfs.tests.base import BaseServersTest
-from mock import patch
+from mock import patch, MagicMock
 
-from bot.dfs.bridge.workers.request_for_reference import RequestForReference
-from bot.dfs.bridge.sleep_change_value import APIRateController
+from bot.dfs.bridge.data import Data
+from bot.dfs.tests.base import BaseServersTest
 from bot.dfs.bridge.requests_db import RequestsDb
 from bot.dfs.bridge.requests_to_sfs import RequestsToSfs
-from bot.dfs.tests.utils import custom_sleep
+from bot.dfs.tests.utils import custom_sleep, AlmostAlwaysFalse
+from bot.dfs.bridge.sleep_change_value import APIRateController
+from bot.dfs.bridge.workers.request_for_reference import RequestForReference
 
 
 class TestRequestForReferenceWorker(BaseServersTest):
@@ -72,7 +72,6 @@ class TestRequestForReferenceWorker(BaseServersTest):
         self.assertIsNone(rfr.check_incoming_correspondence(self.request_ids))
         self.assertEqual(self.reference_queue.get(), ({"meta": {"id": "123"}}, []))
 
-
     def test_check_incoming_correspondence_sfs_check_request_exception(self):
         self.redis.flushall()
         self.request_ids = {'req1': {'code': []}}
@@ -113,3 +112,30 @@ class TestRequestForReferenceWorker(BaseServersTest):
         data = Data(tender_id, award_id, "12345678", "comname", {"meta": {"id": 122}})
         self.request_db.add_award(tender_id, award_id, request_id, data)
         rfr.sfs_receiver(request_id, "12345678", "", "")
+
+    def test_db_connection_problem(self):
+        reference_queue = Queue(10)
+        mock_request_db = MagicMock(get_pending_requests=MagicMock(side_effect=Exception))
+        rfr = RequestForReference(reference_queue, self.request_to_sfs, mock_request_db, self.sna,
+                                  self.sleep_change_value, 1)
+        with patch.object(rfr, 'exit', AlmostAlwaysFalse()):
+            rfr.sfs_checker()
+
+    def test_sfs_check_exception(self):
+        reference_queue = Queue(10)
+        self.request_ids = {'req1': {'code': []}}
+        mock_request_sfs = MagicMock(sfs_check_request=MagicMock(side_effect=Exception))
+        rfr = RequestForReference(reference_queue, mock_request_sfs, self.request_db, self.sna,
+                                  self.sleep_change_value, 1)
+        rfr.check_incoming_correspondence(self.request_ids)
+
+    def test_sfs_receive_request_exception(self):
+        reference_queue = Queue(10)
+        self.request_ids = {'req1': {'code': []}}
+        mock_request_sfs = MagicMock(sfs_receive_request=MagicMock(side_effect=Exception))
+        rfr = RequestForReference(reference_queue, mock_request_sfs, self.request_db, self.sna,
+                                  self.sleep_change_value, 1)
+        code = []
+        ca_name = ''
+        cert = ''
+        rfr.sfs_receiver(self.request_ids, code, ca_name, cert)

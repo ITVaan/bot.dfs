@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from bot.dfs.bridge.data import Data
 from gevent import monkey
 
 monkey.patch_all()
@@ -9,7 +8,7 @@ from datetime import datetime
 from gevent import spawn, sleep
 
 from bot.dfs.bridge.workers.base_worker import BaseWorker
-from bot.dfs.bridge.utils import business_date_checker, generate_doc_id
+from bot.dfs.bridge.utils import business_date_checker
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ class RequestForReference(BaseWorker):
                     logger.warning(u'Fail to get pending requests. Message {}'.format(e.message))
                 else:
                     self.check_incoming_correspondence(request_ids)
-            sleep(15)
+            sleep(self.delay)
 
     def check_incoming_correspondence(self, request_ids):
         for request_id, request_data in request_ids.items():
@@ -73,10 +72,11 @@ class RequestForReference(BaseWorker):
             logger.warning(u'Fail to check for incoming correspondence. Message {}'.format(e.message))
             sleep()
         else:
+            self.request_db.complete_request(request_id)
             try:
                 logger.info('Put request_id {} to process...'.format(request_id))
                 all_the_data = self.request_db.get_tenders_of_request(request_id)
-                yamled_data = {"meta": {"id": "123"}} # TODO: placeholder; presume it will contain stuff needed
+                yamled_data = {"meta": {"id": "123"}}  # TODO: placeholder; presume it will contain stuff needed
                 for data in all_the_data:
                     data.file_content['meta'].update(yamled_data['meta'])
                 self.reference_queue.put((yamled_data, all_the_data))

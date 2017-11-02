@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from base import BaseServersTest
 from bot.dfs.bridge.data import Data
-from json import loads, dumps
 from bot.dfs.bridge.requests_db import RequestsDb, award_key
 
 
@@ -58,4 +57,3 @@ class TestRequestsDb(BaseServersTest):
         data = Data(tender_id, award_id, "12345678", "comname", {"meta": {"id": 122}})
         self.requests_db.add_award(tender_id, award_id, request_id, data)
         self.assertEqual(self.requests_db.get_tenders_of_request(request_id), [data])
-

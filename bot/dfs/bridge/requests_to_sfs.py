@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging.config
 
-from bot.dfs.bridge.xml_utils import form_xml_to_post
 from zeep import Client
+
+from bot.dfs.bridge.xml_utils import form_xml_to_post
 
 logger = logging.getLogger(__name__)
 

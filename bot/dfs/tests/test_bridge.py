@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 
+from restkit import RequestError
+from mock import MagicMock, patch
+
 from base import BaseServersTest, config
 from bot.dfs.bridge.bridge import EdrDataBridge
-from mock import MagicMock, patch
 from openprocurement_client.client import TendersClient, TendersClientSync
-from restkit import RequestError
 from utils import AlmostAlwaysTrue, custom_sleep
 
 
@@ -43,7 +44,8 @@ class TestBridgeWorker(BaseServersTest):
                           'api_version': config['main']['tenders_api_version']})
 
     def test_start_jobs(self):
-        scanner, filter_tender, sfs_reqs_worker, upload_file_to_doc_service, upload_file_to_tender = [MagicMock(return_value=i) for i in range(5)]
+        scanner, filter_tender, sfs_reqs_worker, upload_file_to_doc_service, upload_file_to_tender = [
+            MagicMock(return_value=i) for i in range(5)]
         self.worker.scanner = scanner
         self.worker.filter_tender = filter_tender
         self.worker.sfs_reqs_worker = sfs_reqs_worker
@@ -66,7 +68,8 @@ class TestBridgeWorker(BaseServersTest):
 
     @patch('gevent.sleep')
     def test_bridge_run(self, sleep):
-        scanner, filter_tender, sfs_reqs_worker, upload_file_to_doc_service, upload_file_to_tender = [MagicMock() for _ in range(5)]
+        scanner, filter_tender, sfs_reqs_worker, upload_file_to_doc_service, upload_file_to_tender = [MagicMock() for _
+                                                                                                      in range(5)]
         self.worker.scanner = scanner
         self.worker.filter_tender = filter_tender
         self.worker.sfs_reqs_worker = sfs_reqs_worker
@@ -116,13 +119,15 @@ class TestBridgeWorker(BaseServersTest):
         self.worker.check_openprocurement_api = MagicMock(side_effect=RequestError())
         self.worker.check_services()
         self.assertTrue(self.worker.set_sleep.called)
-
+    #
     # @patch("gevent.sleep")
     # def test_check_log(self, gevent_sleep):
     #     gevent_sleep = custom_sleep
     #     self.worker = EdrDataBridge(config)
     #     self.worker.edrpou_codes_queue = MagicMock(qsize=MagicMock(side_effect=Exception()))
+    #     self.worker._start_jobs = MagicMock()
     #     self.worker.check_services = MagicMock(return_value=True)
+    #     self.worker.check_and_revive_jobs = MagicMock()
     #     self.worker.run()
     #     self.assertTrue(self.worker.edrpou_codes_queue.qsize.called)
 

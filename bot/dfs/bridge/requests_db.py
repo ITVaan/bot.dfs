@@ -1,8 +1,8 @@
 # coding=utf-8
 from time import time
+from simplejson import loads
 
 from bot.dfs.bridge.data import Data
-from simplejson import loads
 
 
 class RequestsDb(object):
