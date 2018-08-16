@@ -2,7 +2,7 @@
 import os
 import xmlschema
 import logging.config
-from datetime import datetime
+import datetime
 from xml.dom import minidom
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
@@ -29,21 +29,32 @@ def form_xml_to_post(data, request_id):
     hnum = SubElement(request, "HNUM")
     hnum.text = str(request_id)
     htin = SubElement(request, "HTIN")
-    htin.text = str(data.code)
-    hlnameu = SubElement(request, "HLNAMEU")
-    hlname = SubElement(request, "HLNAME")
-    hpname = SubElement(request, "HPNAME")
-    hfname = SubElement(request, "HFNAME")
-    if data.is_physical:
-        hlname.text = data.last_name
-        hpname.text = data.first_name
-        hfname.text = data.family_name
-    else:
-        hlnameu.text = data.company_name
-    id = SubElement(request, "ID")
-    id.text = str(data.tender_id)
+    htin.text = u'02426097'
     hfill = SubElement(request, "HFILL")
-    hfill.text = datetime.now().isoformat()
+    hfill.text = str(datetime.date.today())
+    htime = SubElement(request, "HTIME")
+    htime.text = str(datetime.datetime.now().time().replace(microsecond=0))
+    hname = SubElement(request, "HNAME")
+    hname.text = u'ДП «ПРОЗОРРО»'
+    hksti = SubElement(request, "HKSTI")
+    hksti.text = str(2659)
+    hsti = SubElement(request, "HSTI")
+    hsti.text = u'ДПI у Шевченківському районі ГУ ДФС у м.Києві'
+    r0101g1s = SubElement(request, "R0101G1S")
+    r0101g1s.text = data.tender_id
+    r0201g1s = SubElement(request, "R0201G1S")
+    r0201g1s.text = data.code
+    r0202g1s = SubElement(request, "R0202G1S")
+    if r0201g1s.text == data.code:
+        r0202g1s.text = data.name
+    r0203g1s = SubElement(request, "R0203G1S")
+    r0204g1s = SubElement(request, "R0204G1S")
+    r0205g1s = SubElement(request, "R0205G1S")
+    if data.is_physical:
+        r0203g1s.text = data.first_name
+        r0204g1s.text = data.last_name
+        r0205g1s.text = data.family_name
+
     logger.info("Request {} is valid? {}".format(request_id, is_valid(request)))
 
 

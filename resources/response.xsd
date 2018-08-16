@@ -3,14 +3,23 @@
 
     <xs:complexType name="response">
         <xs:sequence>
-            <xs:element name="HFILL" type="xs:dateTime" minOccurs="1"/>
-            <xs:element name="HTIN" type="xs:string" minOccurs="1"/>
-            <xs:element name="HLNAMEU" type="xs:string" minOccurs="1"/>
-            <xs:element name="HLNAME" type="xs:string" minOccurs="1"/>
-            <xs:element name="HPNAME" type="xs:string" minOccurs="1"/>
-            <xs:element name="HFNAME" type="xs:string"/>
-            <xs:element name="FLAG" type="xs:string" minOccurs="1"/>
-            <xs:element name="HFILL1" type="xs:dateTime" minOccurs="1"/>
+            <xs:element name="HNUM1" type="xs:string"/>
+            <xs:element name="HFILL1" type="xs:dateTime" minOccurs="0"/>
+            <xs:element name="HNAME" type="xs:string"minOccurs="0"/>
+            <xs:element name="HTIN" type="xs:string" minOccurs="0"/>
+            <xs:element name="HKSTI" type="xs:string" minOccurs="0"/>
+            <xs:element name="HSTI" type="xs:string" minOccurs="0"/>
+
+            <xs:element name="R0201G1S" type="xs:string" minOccurs="0"/>
+            <xs:element name="R0202G1S" type="xs:string"/>
+            <xs:element name="R0203G1S" type="xs:string"/>
+            <xs:element name="R0204G1S" type="xs:string"/>
+            <xs:element name="R0205G1S" type="xs:string"/>
+            <xs:element name="R0301G1S" type="xs:string" minOccurs="0"/>
+            <xs:element name="R0401G1S" type="xs:string"/>
+
+            <xs:element name="HFILL" type="xs:date" minOccurs="0"/>
+            <xs:element name="HTIME" type="xs:time" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 
